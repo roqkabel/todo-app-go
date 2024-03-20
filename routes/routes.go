@@ -12,5 +12,7 @@ func RegisterRoutes(r chi.Router) chi.Router {
 	r.Delete("/todos/{todoId}", HandleDeleteTodo)
 	r.Patch("/todos/{todoId}/toggle-completed", HandleToggleComplete)
 
+	r.Post("/users/register", HandleUserRegistration)
+
 	return r
 }
