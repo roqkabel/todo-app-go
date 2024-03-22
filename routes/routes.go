@@ -9,7 +9,6 @@ func RegisterRoutes(r chi.Router, tokenAuth *jwtauth.JWTAuth) chi.Router {
 	r.Group(func(r chi.Router) {
 
 		r.Use(jwtauth.Verifier(tokenAuth))
-
 		r.Use(jwtauth.Authenticator(tokenAuth))
 
 		r.Get("/todos", HandleGetTodo)
@@ -17,6 +16,10 @@ func RegisterRoutes(r chi.Router, tokenAuth *jwtauth.JWTAuth) chi.Router {
 		r.Put("/todos/{todoId}", HandleEditTodo)
 		r.Delete("/todos/{todoId}", HandleDeleteTodo)
 		r.Patch("/todos/{todoId}/toggle-completed", HandleToggleComplete)
+
+		// users
+
+		r.Get("/users/todos", HandleUserGetTodos)
 	})
 
 	r.Post("/users/register", HandleUserRegistration)

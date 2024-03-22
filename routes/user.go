@@ -7,6 +7,7 @@ import (
 	"example.com/todo-app/db"
 	"example.com/todo-app/helpers"
 	"example.com/todo-app/models"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
 
@@ -129,6 +130,38 @@ func HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]any{
 		"token": tokenString,
 		"name":  foundUser.Name,
+	})
+
+}
+
+func HandleUserGetTodos(w http.ResponseWriter, r *http.Request) {
+
+	_, claims, err := jwtauth.FromContext(r.Context())
+
+	if err != nil {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 500,
+			Message:    "An error occurred trying to claim jwt",
+		})
+		return
+	}
+
+	userId := int64(claims["user_id"].(float64))
+
+	todos := []models.Todo{}
+
+	if tx := db.DB.Where("user_id = ?", userId).Find(&todos); tx.Error != nil {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 500,
+			Message:    "An error occured whiles trying to todos",
+		})
+		return
+	}
+
+	helpers.Response(w, r, helpers.ResponseParams{
+		StatusCode: 200,
+		Message:    "Todo retrieved",
+		Result:     todos,
 	})
 
 }

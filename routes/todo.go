@@ -7,8 +7,10 @@ import (
 	"net/http"
 
 	"example.com/todo-app/db"
+	"example.com/todo-app/helpers"
 	"example.com/todo-app/models"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
 
@@ -22,7 +24,7 @@ func HandleGetTodo(w http.ResponseWriter, r *http.Request) {
 
 	var resultedTodos []models.Todo
 
-	db.DB.Model(&models.Todo{}).Order("created_at desc").Find(&resultedTodos)
+	db.DB.Model(&models.Todo{}).Order("created_at desc").Preload("User").Find(&resultedTodos)
 
 	render.JSON(w, r, resultedTodos)
 }
@@ -31,7 +33,26 @@ func HandleCreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	todo := &models.Todo{}
 
-	err := json.NewDecoder(r.Body).Decode(&todo)
+	_, claims, err := jwtauth.FromContext(r.Context())
+
+	if err != nil {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 500,
+			Message:    "Failed trying to get jwt claims",
+			Result:     nil,
+		})
+		return
+	}
+
+	var userId float64 = claims["user_id"].(float64)
+
+	// set user id to todo.
+
+	todo.UserID = int64(userId)
+
+	// find user by ID.
+
+	err = json.NewDecoder(r.Body).Decode(&todo)
 
 	defer r.Body.Close()
 
@@ -51,8 +72,10 @@ func HandleCreateTodo(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(newTodo.Error)
 
-	w.WriteHeader(201)
-	render.JSON(w, r, "Created todo successfull")
+	helpers.Response(w, r, helpers.ResponseParams{
+		StatusCode: 201,
+		Message:    "Created Todo successfully",
+	})
 }
 
 func HandleEditTodo(w http.ResponseWriter, r *http.Request) {
