@@ -3,6 +3,7 @@ package helpers
 import (
 	"net/http"
 
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )
 
@@ -19,3 +20,5 @@ func Response(w http.ResponseWriter, r *http.Request, params ResponseParams) {
 		"result":  params.Result,
 	})
 }
+
+var AppTokenAuth = jwtauth.JWTAuth{}

@@ -7,7 +7,13 @@ import (
 	"example.com/todo-app/db"
 	"example.com/todo-app/helpers"
 	"example.com/todo-app/models"
+	"github.com/go-chi/render"
 )
+
+type UserLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 
 func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
 
@@ -35,6 +41,21 @@ func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// hash password
+
+	hashedPassword, err := helpers.HashPassword(user.Password)
+
+	if err != nil {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 500,
+			Message:    "An system error occured",
+			Result:     nil,
+		})
+		return
+	}
+
+	user.Password = hashedPassword
+
 	// save data
 
 	if tx := db.DB.Model(&models.User{}).Create(&user); tx.Error != nil {
@@ -55,9 +76,9 @@ func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
 
 func HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 
-	user := models.User{}
+	loginRequest := UserLoginRequest{}
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 
 	if err != nil {
 		helpers.Response(w, r, helpers.ResponseParams{
@@ -68,11 +89,11 @@ func HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// verify is user has an account
+	defer r.Body.Close()
 
 	var foundUser models.User
 
-	if tx := db.DB.Model(models.User{Email: user.Email}).First(&foundUser); tx.Error != nil {
+	if tx := db.DB.Model(models.User{Email: loginRequest.Email}).First(&foundUser); tx.Error != nil {
 		helpers.Response(w, r, helpers.ResponseParams{
 			StatusCode: 400,
 			Message:    "Account with the email does not exist",
@@ -81,5 +102,33 @@ func HandleUserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//  compare user password.
+
+	if !helpers.MatchPasswords(loginRequest.Password, foundUser.Password) {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 400,
+			Message:    "Password does not match",
+			Result:     nil,
+		})
+		return
+	}
+
+	// generate user tokens
+
+	_, tokenString, err := helpers.AppTokenAuth.Encode(map[string]interface{}{
+		"user_id": foundUser.ID,
+	})
+
+	if err != nil {
+		helpers.Response(w, r, helpers.ResponseParams{
+			StatusCode: 500,
+			Message:    "An error occured trying to geneate jwt",
+			Result:     nil,
+		})
+	}
+
+	render.JSON(w, r, map[string]any{
+		"token": tokenString,
+		"name":  foundUser.Name,
+	})
 
 }
