@@ -12,7 +12,7 @@ Todo:
 - [x] Delete Todo 
 - [x] Toggle Todo Is Completed / Not Completed
 - [ ] Attach User ID to Todos.
-- [ ] Prevent Unauthorized users from creating Todo
+- [x] Prevent Unauthorized users from creating Todo
   
 
 Users:
