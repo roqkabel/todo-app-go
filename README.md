@@ -2,6 +2,16 @@
 
 This public repo demonstrate a todo app API development using Go lang.
 
+## Library / Packages Used
+
+- Chi (router) - github.com/go-chi/chi/v5
+- Jwt (From Chi) - github.com/go-chi/jwtauth
+- Gorm ( ORM ) - gorm.io/gorm
+- Render ( response helper ) - github.com/go-chi/render
+- Bcrypt ( Password Encoder / Decoder ) -  golang.org/x/crypto
+- Postgres DB Driver - gorm.io/driver/postgres
+
+
 ### Features include.
 
 Todo:
