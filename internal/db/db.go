@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 
+	"example.com/todo-app/config"
 	"example.com/todo-app/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -10,10 +11,11 @@ import (
 
 var DB *gorm.DB
 
-func InitDB() *gorm.DB {
-	db_dns := "host=localhost user=postgres password=password dbname=todoappdb port=5555 sslmode=disable TimeZone=Africa/Accra"
+func InitDB(config config.Configuration) (*gorm.DB, error) {
 
-	db, err := gorm.Open(postgres.Open(db_dns), &gorm.Config{})
+	dbDSN := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=%v TimeZone=%v", config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_NAME, config.DB_PORT, config.DB_SSLMODE, config.DB_TIMEZONE)
+
+	db, err := gorm.Open(postgres.Open(dbDSN), &gorm.Config{})
 
 	if err != nil {
 		panic("Unable to connect to database")
@@ -21,20 +23,20 @@ func InitDB() *gorm.DB {
 
 	fmt.Println("Successfully connected to database ...")
 
-	migrations(db)
-
-	DB = db
-	return db
-}
-
-func migrations(db *gorm.DB) {
-	err := db.AutoMigrate(&models.Todo{}, &models.User{})
-	// err = db.AutoMigrate(&models.User{})
-
-	if err != nil {
-		panic("Cannot perform migrations")
+	if err := migrations(db); err != nil {
+		return nil, fmt.Errorf("failed to migrate database: %v", err)
 	}
 
+	DB = db
+	return db, nil
+}
+
+func migrations(db *gorm.DB) error {
+
+	if err := db.AutoMigrate(&models.Todo{}, &models.User{}); err != nil {
+		return fmt.Errorf("failed to perform migrations: %v", err)
+	}
 	fmt.Println("Successfully migrated database ...")
+	return nil
 
 }
