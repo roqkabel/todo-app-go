@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"example.com/todo-app/db"
-	"example.com/todo-app/helpers"
-	"example.com/todo-app/models"
+	"example.com/todo-app/internal/db"
+	"example.com/todo-app/internal/helpers"
+	"example.com/todo-app/internal/models"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 )

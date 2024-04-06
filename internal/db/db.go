@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 
-	"example.com/todo-app/models"
+	"example.com/todo-app/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
