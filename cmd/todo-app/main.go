@@ -35,8 +35,8 @@ func main() {
 	router.Use(middleware.Recoverer)
 	routes.RegisterRoutes(router, TokenAuth)
 
-	fmt.Printf("Started server on port: %v \n", 3000)
-	err = http.ListenAndServe(":3000", router)
+	fmt.Printf("Started server on port: %v \n", 5050)
+	err = http.ListenAndServe(":5050", router)
 
 	if err != nil {
 		panic("Error starting server")
