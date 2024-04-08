@@ -1,10 +1,7 @@
 package config
 
 import (
-	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 type Configuration struct {
@@ -19,9 +16,11 @@ type Configuration struct {
 
 func (c *Configuration) LoadEnvironmentVars() {
 
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Unable to retrieve environment variables")
-	}
+	// if err := godotenv.Load(); err != nil {
+	// 	log.Fatal("Unable to retrieve environment variables")
+	// }
+
+	// fmt.Println(os.Environ())
 
 	c.DB_HOST = os.Getenv("DB_HOST")
 	c.DB_USER = os.Getenv("DB_USER")
