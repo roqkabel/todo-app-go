@@ -1,0 +1,8 @@
+resources:
+  - todo-deployment.yml
+
+
+secretGenerator:
+  - name: todo-backend
+    env:
+      .env.secret
